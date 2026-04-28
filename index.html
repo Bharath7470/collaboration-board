@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Real-Time Collaboration Board</title>
+
   <style>
     body {
       font-family: Arial;
@@ -15,14 +16,14 @@
 
     input {
       padding: 10px;
-      width: 250px;
+      margin: 5px;
+      width: 200px;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
 
     button {
-      padding: 10px 15px;
-      margin-left: 5px;
+      padding: 8px 12px;
       background: #007bff;
       color: white;
       border: none;
@@ -44,7 +45,7 @@
     li {
       background: white;
       padding: 10px;
-      margin: 8px 0;
+      margin: 10px 0;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: left;
@@ -54,12 +55,24 @@
       font-size: 12px;
       color: gray;
     }
+
+    .delete-btn {
+      margin-top: 5px;
+      background: red;
+    }
+
+    .delete-btn:hover {
+      background: darkred;
+    }
   </style>
 </head>
 
 <body>
 
 <h2>Real-Time Collaboration Board</h2>
+
+<input type="text" id="username" placeholder="Your name">
+<br>
 
 <input type="text" id="note" placeholder="Write something...">
 <button onclick="addNote()">Add</button>
@@ -83,12 +96,16 @@ const db = firebase.firestore();
 // Add note
 function addNote() {
   const input = document.getElementById("note");
+  const userInput = document.getElementById("username");
+
   const note = input.value.trim();
+  const user = userInput.value.trim() || "Anonymous";
 
   if (note === "") return;
 
   db.collection("notes").add({
     text: note,
+    user: user,
     time: Date.now()
   });
 
@@ -115,13 +132,20 @@ db.collection("notes").orderBy("time")
     const date = new Date(data.time);
 
     li.innerHTML = `
-      <strong>${data.text}</strong><br>
+      <strong>${data.user}:</strong> ${data.text}<br>
       <span class="time">${date.toLocaleString()}</span>
+      <br>
+      <button class="delete-btn" onclick="deleteNote('${doc.id}')">Delete</button>
     `;
 
     list.appendChild(li);
   });
 });
+
+// Delete note
+function deleteNote(id) {
+  db.collection("notes").doc(id).delete();
+}
 </script>
 
 </body>
