@@ -5,60 +5,88 @@
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 350px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
       text-align: center;
-      background: #f4f4f4;
     }
 
     h2 {
-      margin-top: 20px;
+      margin-bottom: 15px;
     }
 
     input {
+      width: 90%;
       padding: 10px;
-      margin: 5px;
-      width: 200px;
+      margin: 5px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
 
-    button {
-      padding: 8px 12px;
-      background: #007bff;
+    .add-btn {
+      width: 95%;
+      padding: 10px;
+      background: #667eea;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 5px;
     }
 
-    button:hover {
-      background: #0056b3;
+    .add-btn:hover {
+      background: #5a67d8;
     }
 
     ul {
       list-style: none;
       padding: 0;
-      max-width: 400px;
-      margin: 20px auto;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     li {
-      background: white;
+      background: #f9f9f9;
       padding: 10px;
-      margin: 10px 0;
+      margin: 8px 0;
       border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: left;
+      position: relative;
+    }
+
+    .username {
+      font-weight: bold;
+      color: #333;
     }
 
     .time {
-      font-size: 12px;
+      font-size: 11px;
       color: gray;
     }
 
     .delete-btn {
-      margin-top: 5px;
+      position: absolute;
+      right: 10px;
+      top: 10px;
       background: red;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
     }
 
     .delete-btn:hover {
@@ -69,15 +97,15 @@
 
 <body>
 
-<h2>Real-Time Collaboration Board</h2>
+<div class="container">
+  <h2>Collaboration Board</h2>
 
-<input type="text" id="username" placeholder="Your name">
-<br>
+  <input type="text" id="username" placeholder="Your name">
+  <input type="text" id="note" placeholder="Write a note...">
+  <button class="add-btn" onclick="addNote()">Add Note</button>
 
-<input type="text" id="note" placeholder="Write something...">
-<button onclick="addNote()">Add</button>
-
-<ul id="notes"></ul>
+  <ul id="notes"></ul>
+</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -95,10 +123,10 @@ const db = firebase.firestore();
 
 // Add note
 function addNote() {
-  const input = document.getElementById("note");
+  const noteInput = document.getElementById("note");
   const userInput = document.getElementById("username");
 
-  const note = input.value.trim();
+  const note = noteInput.value.trim();
   const user = userInput.value.trim() || "Anonymous";
 
   if (note === "") return;
@@ -109,14 +137,12 @@ function addNote() {
     time: Date.now()
   });
 
-  input.value = "";
+  noteInput.value = "";
 }
 
 // Enter key support
 document.getElementById("note").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    addNote();
-  }
+  if (e.key === "Enter") addNote();
 });
 
 // Real-time listener
@@ -132,10 +158,9 @@ db.collection("notes").orderBy("time")
     const date = new Date(data.time);
 
     li.innerHTML = `
-      <strong>${data.user}:</strong> ${data.text}<br>
+      <span class="username">${data.user}</span>: ${data.text}<br>
       <span class="time">${date.toLocaleString()}</span>
-      <br>
-      <button class="delete-btn" onclick="deleteNote('${doc.id}')">Delete</button>
+      <button class="delete-btn" onclick="deleteNote('${doc.id}')">X</button>
     `;
 
     list.appendChild(li);
